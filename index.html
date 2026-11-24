@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 옷장 보드</title>
+<style>
+:root{
+  --bg:#f6f3ee; --surface:#fffdf9; --line:#e4ddd2; --text:#25211c; --muted:#7a7166;
+  --accent:#2f4a6b; --accent-ink:#fff; --soft:#ece6dc; --star:#c08a2b; --pick:#2f4a6b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17150f; --surface:#211e18; --line:#3a352c; --text:#efe9df; --muted:#a39a8c;
+    --accent:#8fb0d8; --accent-ink:#13171d; --soft:#2b271f; --star:#e0b25a; --pick:#8fb0d8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17150f; --surface:#211e18; --line:#3a352c; --text:#efe9df; --muted:#a39a8c;
+  --accent:#8fb0d8; --accent-ink:#13171d; --soft:#2b271f; --star:#e0b25a; --pick:#8fb0d8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:24px;margin:4px 0 2px;letter-spacing:-.02em}
+h2{font-size:17px;margin:34px 0 12px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;margin-top:16px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.stepper button{border:0;background:none;color:var(--text);width:34px;height:36px;font-size:18px;cursor:pointer}
+.stepper input{width:46px;text-align:center;border:0;background:none;color:var(--text);font:600 16px/1 inherit;-moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button{display:none}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.seg button{border:0;background:none;color:var(--muted);padding:0 14px;height:36px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn{border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);height:38px;padding:0 18px;font:600 15px inherit;cursor:pointer}
+.btn.ghost{background:var(--soft);color:var(--text);font-weight:500}
+.btn.small{height:32px;padding:0 12px;font-size:13px}
+.why{font-size:13px;color:var(--muted);margin:12px 0 0}
+.recs{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.combo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.trio.four{grid-template-columns:repeat(4,1fr)}
+.slot{min-width:0}
+.ph{aspect-ratio:3/4;border-radius:9px;overflow:hidden;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.slot .nm{font-size:11.5px;line-height:1.35;margin-top:5px;color:var(--text);word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.slot .k{font-size:10.5px;color:var(--muted)}
+.actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:4px 11px;font:13px inherit;cursor:pointer}
+.chip.on{border-color:var(--accent);color:var(--text);background:var(--soft);font-weight:600}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+.card{cursor:pointer;border-radius:11px;padding:3px;border:2px solid transparent;background:none;text-align:left;color:inherit;font:inherit}
+.card.sel{border-color:var(--pick)}
+.card .nm{font-size:11.5px;line-height:1.35;margin-top:4px;word-break:keep-all}
+.builder{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:12px}
+.builder .trio{max-width:230px}
+.list{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.mini .trio{gap:4px}
+.mini .nm{display:none}
+.meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px}
+.empty{color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:.92}
+</style>
+</head>
+<body>
+<main>
+  <h1>내 옷장 보드</h1>
+  <p class="sub">데이터: <a href="closet.json" style="color:inherit">closet.json</a></p>
+  <p class="sub" id="count"></p>
+
+  <section class="panel controls">
+    <div class="field"><label>아침 최저</label>
+      <div class="stepper"><button data-step="lo:-1">−</button><input id="lo" type="number" value="0"><button data-step="lo:1">+</button></div></div>
+    <div class="field"><label>낮 최고</label>
+      <div class="stepper"><button data-step="hi:-1">−</button><input id="hi" type="number" value="9"><button data-step="hi:1">+</button></div></div>
+    <div class="field"><label>상황</label>
+      <div class="seg" id="mode"><button data-v="office" class="on">출근</button><button data-v="casual">주말·아이랑</button></div></div>
+    <button class="btn" id="go">추천 받기</button>
+  </section>
+  <p class="why" id="why"></p>
+
+  <h2>추천 조합</h2>
+  <div class="recs" id="recs"></div>
+
+  <h2>직접 조합하기</h2>
+  <div class="builder">
+    <div class="trio" id="pickPreview"></div>
+    <div class="actions"><button class="btn small" id="saveBuild">★ 조합 저장</button><button class="btn small ghost" id="wearBuild">오늘 이걸로</button><button class="btn small ghost" id="clearBuild">비우기</button></div>
+  </div>
+  <div class="tabs seg" id="catTabs" style="display:inline-flex"></div>
+  <div class="chips" id="subChips"></div>
+  <div class="grid" id="grid"></div>
+
+  <h2>저장한 조합</h2>
+  <div class="list" id="saved"></div>
+
+  <h2>최근 입은 옷</h2>
+  <p class="sub" style="margin-bottom:10px">최근 3일 안에 입은 옷은 추천에서 덜 나와요.</p>
+  <div class="list" id="worn"></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const ITEMS = [{"id": "t01", "cat": "상의", "sub": "셔츠", "color": "화이트", "warm": 1, "name": "FOR SKIN 화이트 셔츠(+스트라이프 셔츠)", "img": "img/t01.jpg", "office": true, "accent": false, "hood": false}, {"id": "t02", "cat": "상의", "sub": "니트", "color": "아이보리", "warm": 2, "name": "SUARE 아이보리 니트", "img": "img/t02.jpg", "office": true, "accent": false, "hood": false}, {"id": "t03", "cat": "상의", "sub": "셔츠", "color": "그레이", "warm": 1, "name": "그레이 체크 버튼다운 셔츠", "img": "img/t03.jpg", "office": true, "accent": false, "hood": false}, {"id": "t04", "cat": "상의", "sub": "후드", "color": "그레이", "warm": 2, "name": "널디 그레이 후드", "img": "img/t04.jpg", "office": false, "accent": false, "hood": true}, {"id": "t05", "cat": "상의", "sub": "맨투맨", "color": "네이비", "warm": 2, "name": "네이비 그래픽 맨투맨", "img": "img/t05.jpg", "office": false, "accent": false, "hood": false}, {"id": "t06", "cat": "상의", "sub": "맨투맨", "color": "네이비", "warm": 2, "name": "네이비 맨투맨", "img": "img/t06.jpg", "office": false, "accent": false, "hood": false}, {"id": "t07", "cat": "상의", "sub": "반팔셔츠", "color": "네이비", "warm": 0, "name": "네이비 반팔 밴드카라 셔츠", "img": "img/t07.jpg", "office": false, "accent": false, "hood": false}, {"id": "t08", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "네이비 버튼다운 셔츠", "img": "img/t08.jpg", "office": true, "accent": false, "hood": false}, {"id": "t09", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "네이비 셔츠", "img": "img/t09.jpg", "office": true, "accent": false, "hood": false}, {"id": "t10", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "네이비 윈도우페인 체크 셔츠", "img": "img/t10.jpg", "office": true, "accent": false, "hood": false}, {"id": "t11", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "네이비 체크 버튼다운 셔츠", "img": "img/t11.jpg", "office": true, "accent": false, "hood": false}, {"id": "t12", "cat": "상의", "sub": "긴팔티", "color": "네이비", "warm": 1, "name": "네이비 터틀넥 긴팔티", "img": "img/t12.jpg", "office": true, "accent": false, "hood": false}, {"id": "t13", "cat": "상의", "sub": "니트", "color": "네이비", "warm": 2, "name": "네이비 터틀넥 니트", "img": "img/t13.jpg", "office": true, "accent": false, "hood": false}, {"id": "t14", "cat": "상의", "sub": "니트", "color": "네이비", "warm": 2, "name": "네이비블루 블록 니트", "img": "img/t14.jpg", "office": true, "accent": false, "hood": false}, {"id": "t15", "cat": "상의", "sub": "맨투맨", "color": "네이비", "warm": 2, "name": "네이비화이트 블록 스트라이프 맨투맨", "img": "img/t15.jpg", "office": false, "accent": false, "hood": false}, {"id": "t16", "cat": "상의", "sub": "셔츠", "color": "라이트블루", "warm": 1, "name": "논스탁 샴브레이 셔츠", "img": "img/t16.jpg", "office": true, "accent": false, "hood": false}, {"id": "t17", "cat": "상의", "sub": "맨투맨", "color": "아이보리", "warm": 2, "name": "뉴발란스 아이보리 맨투맨", "img": "img/t17.jpg", "office": false, "accent": false, "hood": false}, {"id": "t18", "cat": "상의", "sub": "맨투맨", "color": "네이비", "warm": 2, "name": "디스커스 네이비 맨투맨", "img": "img/t18.jpg", "office": false, "accent": false, "hood": false}, {"id": "t19", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "라코스테 네이비 깅엄 셔츠", "img": "img/t19.jpg", "office": true, "accent": false, "hood": false}, {"id": "t20", "cat": "상의", "sub": "셔츠", "color": "버건디", "warm": 1, "name": "라코스테 버건디 체크 셔츠", "img": "img/t20.jpg", "office": true, "accent": true, "hood": false}, {"id": "t21", "cat": "상의", "sub": "셔츠", "color": "화이트", "warm": 1, "name": "라코스테 화이트 옥스포드 셔츠", "img": "img/t21.jpg", "office": true, "accent": false, "hood": false}, {"id": "t22", "cat": "상의", "sub": "셔츠", "color": "데님블루", "warm": 1, "name": "리바이스 웨스턴 데님셔츠 M", "img": "img/t22.jpg", "office": true, "accent": false, "hood": false}, {"id": "t23", "cat": "상의", "sub": "셔츠", "color": "아이보리", "warm": 1, "name": "무신사스탠다드 크림 옥스포드 셔츠 M", "img": "img/t23.jpg", "office": true, "accent": false, "hood": false}, {"id": "t24", "cat": "상의", "sub": "셔츠", "color": "베이지", "warm": 1, "name": "베이지 밴드카라 셔츠", "img": "img/t24.jpg", "office": true, "accent": false, "hood": false}, {"id": "t25", "cat": "상의", "sub": "니트", "color": "블랙", "warm": 2, "name": "블랙 니트", "img": "img/t25.jpg", "office": true, "accent": false, "hood": false}, {"id": "t26", "cat": "상의", "sub": "후드", "color": "블랙", "warm": 2, "name": "블랙 와플 헨리 후드", "img": "img/t26.jpg", "office": false, "accent": false, "hood": true}, {"id": "t27", "cat": "상의", "sub": "셔츠", "color": "블랙", "warm": 1, "name": "블랙 체크 셔츠", "img": "img/t27.jpg", "office": true, "accent": false, "hood": false}, {"id": "t28", "cat": "상의", "sub": "맨투맨", "color": "블루", "warm": 2, "name": "블루 맨투맨", "img": "img/t28.jpg", "office": false, "accent": true, "hood": false}, {"id": "t29", "cat": "상의", "sub": "셔츠", "color": "블루", "warm": 1, "name": "블루 스트라이프 버튼다운 셔츠", "img": "img/t29.jpg", "office": true, "accent": true, "hood": false}, {"id": "t30", "cat": "상의", "sub": "니트", "color": "그레이", "warm": 2, "name": "빈폴 그레이 블록 니트", "img": "img/t30.jpg", "office": true, "accent": false, "hood": false}, {"id": "t31", "cat": "상의", "sub": "카라티", "color": "블랙", "warm": 1, "name": "빈폴 블랙그레이 스트라이프 카라 긴팔티", "img": "img/t31.jpg", "office": true, "accent": false, "hood": false}, {"id": "t32", "cat": "상의", "sub": "셔츠", "color": "라이트블루", "warm": 1, "name": "스탠다드 라이트블루 옥스포드 셔츠", "img": "img/t32.jpg", "office": true, "accent": false, "hood": false}, {"id": "t33", "cat": "상의", "sub": "맨투맨", "color": "그레이", "warm": 2, "name": "아디다스 그레이블랙 블록 맨투맨", "img": "img/t33.jpg", "office": false, "accent": false, "hood": false}, {"id": "t34", "cat": "상의", "sub": "후드", "color": "민트", "warm": 2, "name": "아디다스 민트 후드", "img": "img/t34.jpg", "office": false, "accent": true, "hood": true}, {"id": "t35", "cat": "상의", "sub": "후드", "color": "네이비", "warm": 2, "name": "아디다스 오리지널스 네이비 후드", "img": "img/t35.jpg", "office": false, "accent": false, "hood": true}, {"id": "t36", "cat": "상의", "sub": "셔츠", "color": "그레이", "warm": 1, "name": "유니클로 그레이 셔츠(새상품)", "img": "img/t36.jpg", "office": true, "accent": false, "hood": false}, {"id": "t37", "cat": "상의", "sub": "긴팔티", "color": "그레이", "warm": 1, "name": "유니클로 그레이 스트라이프 긴팔티", "img": "img/t37.jpg", "office": true, "accent": false, "hood": false}, {"id": "t38", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "유니클로 네이비 셔츠", "img": "img/t38.jpg", "office": true, "accent": false, "hood": false}, {"id": "t39", "cat": "상의", "sub": "셔츠", "color": "네이비", "warm": 1, "name": "지오다노 네이비 셔츠", "img": "img/t39.jpg", "office": true, "accent": false, "hood": false}, {"id": "t40", "cat": "상의", "sub": "셔츠", "color": "블루", "warm": 1, "name": "지오다노 블루 체크 플란넬", "img": "img/t40.jpg", "office": true, "accent": true, "hood": false}, {"id": "t41", "cat": "상의", "sub": "셔츠", "color": "화이트", "warm": 1, "name": "지오다노 화이트 셔츠 M(새상품)", "img": "img/t41.jpg", "office": true, "accent": false, "hood": false}, {"id": "t42", "cat": "상의", "sub": "셔츠", "color": "차콜", "warm": 1, "name": "차콜 워크셔츠", "img": "img/t42.jpg", "office": true, "accent": false, "hood": false}, {"id": "t43", "cat": "상의", "sub": "맨투맨", "color": "그레이", "warm": 2, "name": "카파 그레이 1967 맨투맨", "img": "img/t43.jpg", "office": false, "accent": false, "hood": false}, {"id": "t44", "cat": "상의", "sub": "후드", "color": "그레이", "warm": 2, "name": "타미진스 그레이 후드", "img": "img/t44.jpg", "office": false, "accent": false, "hood": true}, {"id": "t45", "cat": "상의", "sub": "후드", "color": "네이비", "warm": 2, "name": "타미진스 네이비 후드", "img": "img/t45.jpg", "office": false, "accent": false, "hood": true}, {"id": "t46", "cat": "상의", "sub": "셔츠", "color": "라이트블루", "warm": 1, "name": "탑텐 라이트블루 밴드카라 옥스포드 95(+화이트 체크셔츠)", "img": "img/t46.jpg", "office": true, "accent": false, "hood": false}, {"id": "t47", "cat": "상의", "sub": "셔츠", "color": "카키", "warm": 1, "name": "탑텐 카키 셔츠", "img": "img/t47.jpg", "office": true, "accent": true, "hood": false}, {"id": "t48", "cat": "상의", "sub": "카라티", "color": "네이비", "warm": 1, "name": "폴로 네이비 긴팔 폴로셔츠", "img": "img/t48.jpg", "office": true, "accent": false, "hood": false}, {"id": "t49", "cat": "상의", "sub": "셔츠", "color": "라이트블루", "warm": 1, "name": "폴로 라이트블루 옥스포드 셔츠", "img": "img/t49.jpg", "office": true, "accent": false, "hood": false}, {"id": "t50", "cat": "상의", "sub": "셔츠", "color": "화이트", "warm": 1, "name": "화이트 옥스포드 셔츠(블루 안칼라)", "img": "img/t50.jpg", "office": true, "accent": false, "hood": false}, {"id": "t51", "cat": "상의", "sub": "셔츠", "color": "화이트", "warm": 1, "name": "화이트 체크 드레스셔츠", "img": "img/t51.jpg", "office": true, "accent": false, "hood": false}, {"id": "o01", "cat": "아우터", "sub": "자켓", "color": "그레이", "warm": 2, "name": "그레이 니트 자켓", "img": "img/o01.jpg", "office": true, "accent": false, "hood": false}, {"id": "o02", "cat": "아우터", "sub": "집업", "color": "그레이", "warm": 1, "name": "그레이 럭비 후드집업", "img": "img/o02.jpg", "office": false, "accent": false, "hood": true}, {"id": "o03", "cat": "아우터", "sub": "자켓", "color": "그레이", "warm": 2, "name": "그레이 롱 자켓", "img": "img/o03.jpg", "office": true, "accent": false, "hood": false}, {"id": "o04", "cat": "아우터", "sub": "패딩", "color": "그레이", "warm": 4, "name": "그레이 숏패딩", "img": "img/o04.jpg", "office": true, "accent": false, "hood": false}, {"id": "o05", "cat": "아우터", "sub": "조끼", "color": "그레이", "warm": 2, "name": "그레이 퀼팅 플리스 베스트", "img": "img/o05.jpg", "office": true, "accent": false, "hood": false}, {"id": "o06", "cat": "아우터", "sub": "자켓", "color": "카키", "warm": 2, "name": "그레이그린 필드자켓", "img": "img/o06.jpg", "office": true, "accent": true, "hood": false}, {"id": "o07", "cat": "아우터", "sub": "코트", "color": "그린", "warm": 3, "name": "그린 맥코트", "img": "img/o07.jpg", "office": true, "accent": true, "hood": false}, {"id": "o08", "cat": "아우터", "sub": "집업", "color": "블랙", "warm": 1, "name": "나이키 블랙 집업자켓", "img": "img/o08.jpg", "office": false, "accent": false, "hood": false}, {"id": "o09", "cat": "아우터", "sub": "바람막이", "color": "베이지", "warm": 1, "name": "널디 베이지 바람막이", "img": "img/o09.jpg", "office": false, "accent": false, "hood": false}, {"id": "o10", "cat": "아우터", "sub": "바람막이", "color": "아이보리", "warm": 1, "name": "널디 아이보리 바람막이", "img": "img/o10.jpg", "office": false, "accent": false, "hood": false}, {"id": "o11", "cat": "아우터", "sub": "조끼", "color": "네이비", "warm": 2, "name": "네이비 경량패딩 조끼", "img": "img/o11.jpg", "office": true, "accent": false, "hood": false}, {"id": "o12", "cat": "아우터", "sub": "경량패딩", "color": "네이비", "warm": 2, "name": "네이비 경량패딩", "img": "img/o12.jpg", "office": true, "accent": false, "hood": false}, {"id": "o13", "cat": "아우터", "sub": "코트", "color": "네이비", "warm": 3, "name": "네이비 울코트 3버튼", "img": "img/o13.jpg", "office": true, "accent": false, "hood": false}, {"id": "o14", "cat": "아우터", "sub": "패딩", "color": "네이비", "warm": 4, "name": "뉴발란스 네이비 패딩", "img": "img/o14.jpg", "office": true, "accent": false, "hood": false}, {"id": "o15", "cat": "아우터", "sub": "바람막이", "color": "블랙", "warm": 1, "name": "뉴발란스 블랙 코치자켓", "img": "img/o15.jpg", "office": false, "accent": false, "hood": false}, {"id": "o16", "cat": "아우터", "sub": "자켓", "color": "그레이", "warm": 2, "name": "라코스테 그레이 퀼팅 자켓", "img": "img/o16.jpg", "office": true, "accent": false, "hood": false}, {"id": "o17", "cat": "아우터", "sub": "블루종", "color": "베이지", "warm": 2, "name": "베이지 블루종", "img": "img/o17.jpg", "office": true, "accent": false, "hood": false}, {"id": "o18", "cat": "아우터", "sub": "자켓", "color": "베이지", "warm": 2, "name": "베이지 퀼팅 자켓", "img": "img/o18.jpg", "office": true, "accent": false, "hood": false}, {"id": "o19", "cat": "아우터", "sub": "조끼", "color": "블랙", "warm": 2, "name": "블랙 경량패딩 조끼", "img": "img/o19.jpg", "office": true, "accent": false, "hood": false}, {"id": "o20", "cat": "아우터", "sub": "자켓", "color": "블랙", "warm": 2, "name": "블랙 레더자켓", "img": "img/o20.jpg", "office": true, "accent": false, "hood": false}, {"id": "o21", "cat": "아우터", "sub": "패딩", "color": "블랙", "warm": 4, "name": "블랙 롱패딩", "img": "img/o21.jpg", "office": true, "accent": false, "hood": false}, {"id": "o22", "cat": "아우터", "sub": "자켓", "color": "블랙", "warm": 2, "name": "블랙 울 블레이저", "img": "img/o22.jpg", "office": true, "accent": false, "hood": false}, {"id": "o23", "cat": "아우터", "sub": "자켓", "color": "블랙", "warm": 2, "name": "블랙 울자켓", "img": "img/o23.jpg", "office": true, "accent": false, "hood": false}, {"id": "o24", "cat": "아우터", "sub": "코트", "color": "블랙", "warm": 3, "name": "블랙 울코트(+네이비 코트)", "img": "img/o24.jpg", "office": true, "accent": false, "hood": false}, {"id": "o25", "cat": "아우터", "sub": "집업", "color": "그레이", "warm": 1, "name": "아디다스 그레이 트랙탑", "img": "img/o25.jpg", "office": false, "accent": false, "hood": false}, {"id": "o26", "cat": "아우터", "sub": "집업", "color": "블랙", "warm": 1, "name": "아디다스 블랙 트랙탑", "img": "img/o26.jpg", "office": false, "accent": false, "hood": false}, {"id": "o27", "cat": "아우터", "sub": "집업", "color": "블랙", "warm": 1, "name": "아디다스 블랙 후드집업", "img": "img/o27.jpg", "office": false, "accent": false, "hood": true}, {"id": "o28", "cat": "아우터", "sub": "패딩", "color": "차콜", "warm": 4, "name": "아디다스 차콜 후드 패딩", "img": "img/o28.jpg", "office": false, "accent": false, "hood": true}, {"id": "o29", "cat": "아우터", "sub": "플리스", "color": "카키", "warm": 3, "name": "아디다스 카키 보아 플리스", "img": "img/o29.jpg", "office": false, "accent": true, "hood": false}, {"id": "o30", "cat": "아우터", "sub": "자켓", "color": "화이트", "warm": 2, "name": "아디다스 화이트 체크 자켓", "img": "img/o30.jpg", "office": false, "accent": false, "hood": false}, {"id": "o31", "cat": "아우터", "sub": "가디건", "color": "차콜", "warm": 1, "name": "유니클로 차콜 니트 가디건", "img": "img/o31.jpg", "office": true, "accent": false, "hood": false}, {"id": "o32", "cat": "아우터", "sub": "패딩", "color": "네이비", "warm": 4, "name": "유니클로 퍼프테크 네이비 패딩", "img": "img/o32.jpg", "office": true, "accent": false, "hood": false}, {"id": "o33", "cat": "아우터", "sub": "블루종", "color": "카키", "warm": 2, "name": "카키 블루종", "img": "img/o33.jpg", "office": true, "accent": true, "hood": false}, {"id": "o34", "cat": "아우터", "sub": "플리스", "color": "오렌지", "warm": 3, "name": "푸마 오렌지블랙 플리스", "img": "img/o34.jpg", "office": false, "accent": true, "hood": false}, {"id": "b01", "cat": "하의", "sub": "데님", "color": "그레이", "warm": 1, "name": "그레이 워싱 데님", "img": "img/b01.jpg", "office": false, "accent": false, "hood": false}, {"id": "b02", "cat": "하의", "sub": "슬랙스", "color": "블랙", "warm": 1, "name": "무신사스탠다드 블랙 슬랙스", "img": "img/b02.jpg", "office": true, "accent": false, "hood": false}, {"id": "b03", "cat": "하의", "sub": "데님", "color": "중청", "warm": 1, "name": "무신사스탠다드 중청 데님", "img": "img/b03.jpg", "office": true, "accent": false, "hood": false}, {"id": "b04", "cat": "하의", "sub": "슬랙스", "color": "차콜", "warm": 1, "name": "무신사스탠다드 차콜 슬랙스", "img": "img/b04.jpg", "office": true, "accent": false, "hood": false}, {"id": "b05", "cat": "하의", "sub": "데님", "color": "블랙", "warm": 1, "name": "블랙 워싱 데님", "img": "img/b05.jpg", "office": false, "accent": false, "hood": false}, {"id": "b06", "cat": "하의", "sub": "데님", "color": "연청", "warm": 1, "name": "연청 데님", "img": "img/b06.jpg", "office": false, "accent": false, "hood": false}, {"id": "b07", "cat": "하의", "sub": "데님", "color": "진청", "warm": 1, "name": "진청 데님 2벌", "img": "img/b07.jpg", "office": true, "accent": false, "hood": false}, {"id": "b08", "cat": "하의", "sub": "데님", "color": "진청", "warm": 1, "name": "진청 데님", "img": "img/b08.jpg", "office": true, "accent": false, "hood": false}, {"id": "b09", "cat": "하의", "sub": "슬랙스", "color": "차콜", "warm": 1, "name": "차콜 슬랙스+진청 데님", "img": "img/b09.jpg", "office": true, "accent": false, "hood": false}];
+const byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const CATS = ['아우터', '상의', '하의'];
+const $ = s => document.querySelector(s);
+
+/* ---- 저장소(이 브라우저에만 남음) ---- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('closet:' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('closet:' + k, JSON.stringify(v)); } catch {} }
+};
+let saved = store.get('saved', []);
+let worn = store.get('worn', []);
+let mode = store.get('mode', 'office');
+let pick = { '아우터': null, '상의': null, '하의': null };
+let curCat = '아우터', curSub = '전체';
+
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 1600); }
+const today = () => new Date().toISOString().slice(0, 10);
+
+/* ---- 추천 규칙 ---- */
+function outerRange(lo) {
+  if (lo <= -3) return [4, 4];
+  if (lo <= 3) return [3, 4];
+  if (lo <= 8) return [2, 3];
+  if (lo <= 13) return [1, 2];
+  if (lo <= 18) return [1, 1];
+  return null;                       // 아우터 없이
+}
+function topWarm(hi) { return hi <= 12 ? [2] : hi <= 19 ? [1, 2] : [1]; }
+const NEUTRAL = new Set(['네이비','그레이','블랙','화이트','아이보리','차콜','베이지','진청','중청','연청','데님블루','라이트블루']);
+
+function recentIds(days) {
+  const cut = Date.now() - days * 864e5;
+  return new Set(worn.filter(w => new Date(w.date).getTime() >= cut).flatMap(w => w.ids));
+}
+function score(o, t, b, recent) {
+  let s = Math.random() * 3;
+  if (o && o.color !== t.color) s += 2;
+  const acc = [o, t, b].filter(x => x && x.accent).length;
+  if (acc > 1) s -= 4;
+  if (t.color === b.color) s -= 2;
+  if (o && o.hood && t.hood) s -= 6;
+  if (o && o.color === b.color && o.color === t.color) s -= 4;
+  [o, t, b].forEach(x => { if (x && recent.has(x.id)) s -= 5; });
+  if (+$('#hi').value <= 12 && t.warm >= 2) s += 2.5;   // 추운 날엔 니트·맨투맨 우선
+  return s;
+}
+function recommend() {
+  const lo = +$('#lo').value, hi = +$('#hi').value;
+  const ok = i => mode === 'casual' || i.office;
+  const or = outerRange(lo), tw = topWarm(hi);
+  let outers = or ? ITEMS.filter(i => i.cat === '아우터' && ok(i) && i.sub !== '조끼' && i.warm >= or[0] && i.warm <= or[1]) : [null];
+  let tops = ITEMS.filter(i => i.cat === '상의' && ok(i) && tw.includes(i.warm));
+  if (hi <= 12 && mode === 'office') tops = tops.concat(ITEMS.filter(i => i.cat === '상의' && i.warm === 1 && ok(i))); // 출근용 두꺼운 상의가 적어 셔츠도 허용(조끼 받쳐 입기)
+  const bottoms = ITEMS.filter(i => i.cat === '하의' && ok(i));
+  if (!outers.length) outers = [null];
+  const recent = recentIds(3), cands = [];
+  for (let n = 0; n < 600; n++) {
+    const o = outers[Math.floor(Math.random() * outers.length)], t = tops[Math.floor(Math.random() * tops.length)], b = bottoms[Math.floor(Math.random() * bottoms.length)];
+    if (!t || !b) break;
+    cands.push({ o, t, b, s: score(o, t, b, recent) });
+  }
+  cands.sort((a, c) => c.s - a.s);
+  const out = [], used = new Set();
+  for (const c of cands) {
+    const ks = [c.o && c.o.id, c.t.id].filter(Boolean);
+    if (ks.some(k => used.has(k))) continue;
+    ks.forEach(k => used.add(k)); out.push(c);
+    if (out.length === 3) break;
+  }
+  // 얇은 아우터 + 셔츠 조합이면 경량 조끼를 받쳐 입도록 제안
+  out.forEach(c => {
+    if (lo <= 6 && c.o && c.o.sub !== '패딩' && c.t.warm <= 1) {
+      const vests = ITEMS.filter(i => i.sub === '조끼');
+      c.v = vests[Math.floor(Math.random() * vests.length)];
+    }
+  });
+  const ow = or ? (or[0] === or[1] ? `보온 ${or[0]}` : `보온 ${or[0]}~${or[1]}`) + ' 아우터' : '아우터 없이';
+  $('#why').textContent = `아침 ${lo}° → ${ow} · 낮 ${hi}° → ${tw.includes(2) ? (tw.includes(1) ? '셔츠~니트' : '니트·맨투맨·후드급') : '셔츠·얇은 긴팔'} 상의 · ${mode === 'office' ? '출근용 옷' : '전체 옷'}에서 골랐어요.`;
+  store.set('temps', { lo, hi });
+  renderRecs(out);
+}
+
+/* ---- 그리기 ---- */
+function slot(i, label) {
+  return `<div class="slot"><div class="ph">${i ? `<img loading="lazy" src="${i.img}" alt="${i.name}">` : (label || '없음')}</div>
+    ${i ? `<div class="nm">${i.name}</div>` : ''}</div>`;
+}
+function trio(o, t, b, v) {
+  return `<div class="trio${v ? ' four' : ''}">${slot(o, '아우터 없이')}${v ? slot(v) : ''}${slot(t)}${slot(b)}</div>`;
+}
+function renderRecs(list) {
+  $('#recs').innerHTML = list.length ? list.map((c, n) => `<div class="combo">${trio(c.o, c.t, c.b, c.v)}
+    ${c.v ? `<p class="why" style="margin-top:6px">셔츠라 ${c.v.name}를 안에 받쳐 입는 걸 추천해요.</p>` : ''}
+    <div class="actions"><button class="btn small" data-wear="${n}">오늘 이걸로</button><button class="btn small ghost" data-save="${n}">★ 저장</button></div></div>`).join('')
+    : '<p class="empty">조건에 맞는 조합이 없어요. 기온이나 상황을 바꿔 보세요.</p>';
+  $('#recs').onclick = e => {
+    const w = e.target.dataset.wear, s = e.target.dataset.save, c = list[w ?? s];
+    if (!c) return;
+    const ids = [c.o, c.v, c.t, c.b].filter(Boolean).map(i => i.id);
+    w != null ? wear(ids) : save(ids);
+  };
+}
+function save(ids) { saved.unshift({ ids, ts: Date.now() }); store.set('saved', saved); renderLists(); toast('조합을 저장했어요'); }
+function wear(ids) { worn = worn.filter(w => w.date !== today()); worn.unshift({ ids, date: today() }); worn = worn.slice(0, 30); store.set('worn', worn); renderLists(); toast('오늘 입은 옷으로 기록했어요'); }
+
+function miniCombo(ids, meta, del) {
+  const its = ids.map(id => byId[id]).filter(Boolean);
+  return `<div class="combo mini"><div class="trio${its.length === 4 ? ' four' : ''}">${its.map(i => slot(i)).join('')}</div>
+    <div class="meta"><span>${meta}</span><button class="x" data-del="${del}">삭제</button></div></div>`;
+}
+function renderLists() {
+  $('#saved').innerHTML = saved.length ? saved.map((s, n) => miniCombo(s.ids, new Date(s.ts).toLocaleDateString('ko-KR'), 's' + n)).join('') : '<p class="empty">추천이나 직접 조합에서 ★를 누르면 여기에 모여요.</p>';
+  $('#worn').innerHTML = worn.length ? worn.slice(0, 7).map((w, n) => miniCombo(w.ids, w.date, 'w' + n)).join('') : '<p class="empty">아직 기록이 없어요.</p>';
+}
+document.addEventListener('click', e => {
+  const d = e.target.dataset.del; if (!d) return;
+  const n = +d.slice(1);
+  if (d[0] === 's') { saved.splice(n, 1); store.set('saved', saved); } else { worn.splice(n, 1); store.set('worn', worn); }
+  renderLists();
+});
+
+function renderBuilder() {
+  $('#pickPreview').innerHTML = CATS.map(c => slot(pick[c] && byId[pick[c]], c + ' 선택')).join('');
+  $('#catTabs').innerHTML = CATS.map(c => `<button data-c="${c}" class="${c === curCat ? 'on' : ''}">${c} ${ITEMS.filter(i => i.cat === c).length}</button>`).join('');
+  const subs = ['전체', ...new Set(ITEMS.filter(i => i.cat === curCat).map(i => i.sub))];
+  $('#subChips').innerHTML = subs.map(s => `<button class="chip ${s === curSub ? 'on' : ''}" data-s="${s}">${s}</button>`).join('');
+  $('#grid').innerHTML = ITEMS.filter(i => i.cat === curCat && (curSub === '전체' || i.sub === curSub)).map(i =>
+    `<button class="card ${pick[curCat] === i.id ? 'sel' : ''}" data-id="${i.id}"><div class="ph"><img loading="lazy" src="${i.img}" alt=""></div><div class="nm">${i.name}</div></button>`).join('');
+}
+$('#catTabs').onclick = e => { const c = e.target.dataset.c; if (c) { curCat = c; curSub = '전체'; renderBuilder(); } };
+$('#subChips').onclick = e => { const s = e.target.dataset.s; if (s) { curSub = s; renderBuilder(); } };
+$('#grid').onclick = e => {
+  const id = e.target.closest('.card')?.dataset.id; if (!id) return;
+  pick[curCat] = pick[curCat] === id ? null : id;
+  const next = CATS.find(c => !pick[c]);
+  if (pick[curCat] && next) { curCat = next; curSub = '전체'; }
+  renderBuilder();
+};
+const buildIds = () => CATS.map(c => pick[c]).filter(Boolean);
+$('#saveBuild').onclick = () => buildIds().length ? save(buildIds()) : toast('옷을 먼저 골라 주세요');
+$('#wearBuild').onclick = () => buildIds().length ? wear(buildIds()) : toast('옷을 먼저 골라 주세요');
+$('#clearBuild').onclick = () => { pick = { '아우터': null, '상의': null, '하의': null }; curCat = '아우터'; renderBuilder(); };
+
+/* ---- 입력 ---- */
+document.querySelectorAll('[data-step]').forEach(b => b.onclick = () => { const [k, d] = b.dataset.step.split(':'); $('#' + k).value = +$('#' + k).value + +d; });
+$('#mode').onclick = e => { const v = e.target.dataset.v; if (!v) return; mode = v; store.set('mode', v); [...$('#mode').children].forEach(b => b.classList.toggle('on', b.dataset.v === v)); recommend(); };
+$('#go').onclick = recommend;
+
+const t = store.get('temps', null); if (t) { $('#lo').value = t.lo; $('#hi').value = t.hi; }
+[...$('#mode').children].forEach(b => b.classList.toggle('on', b.dataset.v === mode));
+const cnt = c => ITEMS.filter(i => i.cat === c).length;
+$('#count').textContent = `아우터 ${cnt('아우터')} · 상의 ${cnt('상의')} · 하의 ${cnt('하의')} (정리예정 제외)`;
+renderBuilder(); renderLists(); recommend();
+</script>
+</body>
+</html>
