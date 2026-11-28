@@ -12,7 +12,7 @@ ACCENT = {'카키', '그린', '민트', '버건디', '오렌지', '블루'}
 
 def office_ok(r):
     sub, name = r['종류'], r['이름']
-    casual = sub in ('후드', '집업', '플리스', '바람막이', '맨투맨') or any(k in name for k in SPORTY) \
+    casual = sub in ('후드', '집업', '플리스', '바람막이', '맨투맨', '츄리닝') or any(k in name for k in SPORTY) \
         or '연청' in name or '워싱' in name or '반팔' in name
     return (not casual) or sub == '셔츠'
 
@@ -45,7 +45,7 @@ doc = {
     'recommend_hints': {
         'outer_by_morning_low_c': {'<=-3': [4], '-2~3': [3, 4], '4~8': [2, 3], '9~13': [1, 2], '14~18': [1], '>=19': '아우터 없음'},
         'top_by_daytime_high_c': {'<=12': '보온 2(니트·맨투맨·후드)', '13~19': '보온 1~2', '>=20': '보온 1'},
-        'avoid': ['포인트색 2개 이상', '상의·하의 같은 색', '후드 상의 + 후드 아우터', '셋 다 같은 색'],
+        'avoid': ['포인트색 2개 이상', '상의·하의 같은 색', '후드 상의 + 후드 아우터', '셋 다 같은 색', '츄리닝(type=츄리닝) + 코트·블레이저'],
         'note': '셔츠 + 얇은 아우터로 아침 6도 이하면 경량 조끼(type=조끼)를 받쳐 입기',
     },
     'items': items,
